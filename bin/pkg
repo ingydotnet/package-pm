@@ -1,0 +1,4 @@
+#!/usr/bin/env perl
+
+use Package::Command;
+Package::Command->run;
