@@ -57,6 +57,9 @@ sub END {
         unless $SELF->name;
     $SELF->WriteAll;
 
+    # We generate a MANIFEST.SKIP and add things to it.
+    # We add pkg/, because that should only contain author stuff.
+    # We add author only M::I plugins.
     if ($SELF->is_admin) {
         eval "use Module::Install::ManifestSkip; 1" or die $@;
         $SELF->manifest_skip;
