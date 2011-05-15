@@ -14,6 +14,9 @@ our $VERSION = '0.10';
 
 use File::Find;
 
+my $plugins_file = 'pkg/plugins.pl';
+my $makefile = 'pkg/makefile.pl';
+
 # If a Makefile.PL calls 'pkg', save $self, and wait until the END.
 my $SELF;
 sub pkg {
@@ -42,9 +45,13 @@ BEGIN {
 # Run author commands from pkg/makefile.pl.
 # Run other basics.
 sub END {
+    # If $SELF is not set, this module was not actually called for.
     return unless $SELF;
-    my $makefile = 'pkg/makefile.pl';
+
+    $SELF->_install_bin;
+
     if ($SELF->is_admin and -e $makefile) {
+        require $plugins_file if -e $plugins_file;
         open MF, $makefile or die;
         my $mf = do { local $/; <MF> };
         eval "package main; $mf; 1" or die $@;
@@ -52,18 +59,19 @@ sub END {
         $SELF->clean_files('MANIFEST MANIFEST.SKIP');
     }
 
-    $SELF->_install_bin;
     $SELF->all_from($main::PM)
         unless $SELF->name;
     $SELF->WriteAll;
 
     # We generate a MANIFEST.SKIP and add things to it.
     # We add pkg/, because that should only contain author stuff.
-    # We add author only M::I plugins.
+    # We add author only M::I plugins, so they don't get distributed.
     if ($SELF->is_admin) {
         eval "use Module::Install::ManifestSkip; 1" or die $@;
         $SELF->manifest_skip;
+
         open MS, '>>', 'MANIFEST.SKIP' or die;
+        # XXX Hardcoded author list for now. Need to change this.
         print MS <<'...';
 ^pkg/
 ^inc/Module/Install/ManifestSkip.pm$
@@ -71,6 +79,8 @@ sub END {
 ^inc/Module/Install/Stardoc.pm$
 ...
         close MS;
+
+        $SELF->_write_plugins_file;
     }
 }
 
@@ -83,6 +93,24 @@ sub _install_bin {
         push @bin, $File::Find::name;
     }, 'bin');
     $self->install_script($_) for @bin;
+}
+
+sub _write_plugins_file {
+    my ($self) = @_;
+    return unless -d 'pkg';
+    my @inc;
+    File::Find::find(sub {
+        return unless -f $_ and $_ =~ /\.pm$/;
+        push @inc, $File::Find::name;
+    }, 'inc');
+    open PF, '>', $plugins_file or die;
+    print PF join '', map {
+        s!inc[\/\\](.*)\.pm$!$1!;
+        s!/+!::!g;
+        "require $_;\n";
+    } @inc;
+    print PF "1;\n";
+    close PF;
 }
 
 1;
