@@ -11,21 +11,28 @@ Module::Install::Package - Package Support for Module::Install
 =head1 DESCRIPTION
 
 This Module::Install plugin attempts to make your C<Makefile.PL> as small as
-possible. Every C<Makefile.PL> can be an indentical one liner.
+possible. It figures out most of the basics for you, but still let's you
+override everything.
 
 =head1 STATUS
 
-This module is at a proving concepts phase. It is not ready for general use.
+This module is at a "proving concepts" phase. It is not ready for general use.
 
 =head1 CONCEPTS
 
-Some of the things it is doing:
+Modules packaged with Package, put their extra package config info in the pkg/
+directory. Files in this directory never get shipped in the final installable
+distribution.
 
-  * Showing how to make a small, static Makefile.PL
-  * Removing author-only plugins from the dist.
-  * Removing the need for MANIFEST related files.
+Some of the things Package is doing:
 
-All the author specifics go under the pkg/ directory.
+  * Show how to make a small, one-line Makefile.PL
+  * Put overrides in pkg/makefile.pl
+  * Removing author-only Module::Install plugins from the dist.
+  * Removing the need for maintaining MANIFEST related files.
+  * Adding a pkg/plugins.pl file that gets run by authors so they know which
+  Makefile.PL plugins they need to have installed, to hack on the source
+  repository.
 
 =head1 AUTHOR
 
