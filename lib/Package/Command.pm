@@ -14,3 +14,5 @@ package Package::Cmd;
 use Mouse;
 
 package Package::Cmd::new;
+
+1;

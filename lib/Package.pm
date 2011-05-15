@@ -16,3 +16,10 @@ our $VERSION = '0.02';
 
 Package is a toolchain for packaging module distributions. Not just Perl
 modules, but modules from many different languages.
+
+=head1 STATUS
+
+This is a super early, proving concepts, release.
+
+The main thing this module does at this point is offer a Module::Install
+plugin called L<Module::Install::Package>.

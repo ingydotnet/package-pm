@@ -58,6 +58,8 @@ sub END {
     $SELF->WriteAll;
 
     if ($SELF->is_admin) {
+        eval "use Module::Install::ManifestSkip; 1" or die $@;
+        $SELF->manifest_skip;
         open MS, '>>', 'MANIFEST.SKIP' or die;
         print MS <<'...';
 ^pkg/
@@ -90,3 +92,17 @@ sub _install_bin {
 
 This Module::Install plugin attempts to make your C<Makefile.PL> as small as
 possible. Every C<Makefile.PL> can be an indentical one liner.
+
+=head1 STATUS
+
+This module is at a proving concepts phase. It is not ready for general use.
+
+=head1 CONCEPTS
+
+Some of the things it is doing:
+
+  * Showing how to make a small, static Makefile.PL
+  * Removing author-only plugins from the dist.
+  * Removing the need for MANIFEST related files.
+
+All the author specifics go under the pkg/ directory.
