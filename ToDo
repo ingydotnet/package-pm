@@ -1,0 +1,2 @@
+- Generate pkg/used_plugins.pm and load this for author-side so collaborators
+  know what to install.
