@@ -1,9 +1,11 @@
 ---
 version: 0.10
-date:    Tue May 17 14:16:30 EST 2011
+date:    Tue May 17 23:44:30 EST 2011
 changes:
 - Proper rewrite
 - Support 'use inc::Package';
+- Clean out generated pods
+- Lots more docs.
 ---
 version: 0.02
 date:    Mon May 16 01:09:34 EST 2011
