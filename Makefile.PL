@@ -10,5 +10,6 @@ use inc::Package;
 # But you still put requires statements in here (and anything else that needs
 # to run at installation time).
 requires 'Module::Install' => '1.01';
+requires 'Module::Install::ManifestSkip';
 requires 'Mouse';
-requires 'MouseX::App::Command';
+requires 'MouseX::App::Cmd';

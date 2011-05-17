@@ -31,8 +31,8 @@ Some of the things Package is doing:
   * Removing author-only Module::Install plugins from the dist.
   * Removing the need for maintaining MANIFEST related files.
   * Adding a pkg/plugins.pl file that gets run by authors so they know which
-  Makefile.PL plugins they need to have installed, to hack on the source
-  repository.
+    Makefile.PL plugins they need to have installed, to hack on the source
+    repository.
 
 =head1 AUTHOR
 

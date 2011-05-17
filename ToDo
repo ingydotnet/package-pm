@@ -1,4 +1,3 @@
-- Put comments in pkg/plugins.pl
 - Use pkg/conf.yaml
 - Move package-pkg/perl package-pkg/perl/package
 - make $main::POD overloaded variable
@@ -8,7 +7,7 @@
 * inc::Package - inc::Module::Install wrapper.
 * Package::Bootstrap - becomes inc/Package.pm
 
-
-> package new --module=Foo::Bar --from=perl/package
-> package new --module=Foo::Bar --from=perl/module-install
-> package new --module=Foo::Bar --from=perl/module-build
+> package new --module=Foo::Bar --perl
+> package new --module=Foo::Bar --perl=package
+> package new --module=Foo::Bar --perl=module-install
+> package new --module=Foo::Bar --perl=module-build
