@@ -1,15 +1,11 @@
-# This is the package bootstrapping module.
-# It works like inc::Module::Install.
-# It should only be installed on author's perl installs.
+# This is the Package bootstrapping module.
+# It works something like inc::Module::Install.
+# This code should only be loaded in an author environment.
 package inc::Package;
-
-warn "================================> inc::Package";
-package main;
-use Package::Bootstrap;
-
-my $target_file = 'inc/Package.pm';
-unlink $target_file;
-my $source_file = $INC{'Package/Bootstrap.pm'} or die;
-Module::Install::Admin->copy($source_file, $target_file);
+$VERSION = '0.10';
+{
+    package main;
+    use Package::Bootstrap;
+}
 
 1;

@@ -1,15 +1,31 @@
-require Module::Install::Fetch;
-require Module::Install::Win32;
-require Module::Install::ReadmeFromPod;
-require Module::Install::WriteAll;
-require Module::Install::Can;
-require Module::Install::VersionCheck;
-require Module::Install::Metadata;
-require Module::Install::AckXXX;
-require Module::Install::Package;
-require Module::Install::Scripts;
-require Module::Install::Makefile;
-require Module::Install::ManifestSkip;
-require Module::Install::Stardoc;
-require Module::Install::Base;
+require Module::Install
+    unless $INC{'Module/Install.pm'};
+require Module::Install::Fetch
+    unless $INC{'Module/Install/Fetch.pm'};
+require Module::Install::Win32
+    unless $INC{'Module/Install/Win32.pm'};
+require Module::Install::ReadmeFromPod
+    unless $INC{'Module/Install/ReadmeFromPod.pm'};
+require Module::Install::WriteAll
+    unless $INC{'Module/Install/WriteAll.pm'};
+require Module::Install::Can
+    unless $INC{'Module/Install/Can.pm'};
+require Module::Install::VersionCheck
+    unless $INC{'Module/Install/VersionCheck.pm'};
+require Module::Install::Metadata
+    unless $INC{'Module/Install/Metadata.pm'};
+require Module::Install::AckXXX
+    unless $INC{'Module/Install/AckXXX.pm'};
+require Module::Install::Package
+    unless $INC{'Module/Install/Package.pm'};
+require Module::Install::Scripts
+    unless $INC{'Module/Install/Scripts.pm'};
+require Module::Install::Makefile
+    unless $INC{'Module/Install/Makefile.pm'};
+require Module::Install::ManifestSkip
+    unless $INC{'Module/Install/ManifestSkip.pm'};
+require Module::Install::Stardoc
+    unless $INC{'Module/Install/Stardoc.pm'};
+require Module::Install::Base
+    unless $INC{'Module/Install/Base.pm'};
 1;

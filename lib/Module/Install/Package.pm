@@ -7,10 +7,12 @@
 
 package Module::Install::Package;
 use strict;
-use warnings;
-use 5.008003;
-use base 'Module::Install::Base';
-our $VERSION = '0.10';
+use Module::Install::Base;
+use vars qw($VERSION @ISA);
+BEGIN {
+    $VERSION = '0.10';
+    @ISA = 'Module::Install::Base';
+}
 
 use File::Find;
 
@@ -105,9 +107,14 @@ sub _write_plugins_file {
     }, 'inc');
     open PF, '>', $plugins_file or die;
     print PF join '', map {
+        my $INC = $_;
+        $INC =~ s!^inc[\/\\]!!;
+        $INC =~ s!\\!/!g;
         s!inc[\/\\](.*)\.pm$!$1!;
         s!/+!::!g;
-        "require $_;\n";
+        m!^(Package)$!
+            ? ''
+            : "require $_\n    unless \$INC{'$INC'};\n";
     } @inc;
     print PF "1;\n";
     close PF;
