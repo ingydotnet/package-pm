@@ -1,2 +1,14 @@
-- Generate pkg/used_plugins.pm and load this for author-side so collaborators
-  know what to install.
+- Put comments in pkg/plugins.pl
+- Use pkg/conf.yaml
+- Move package-pkg/perl package-pkg/perl/package
+- make $main::POD overloaded variable
+- Test on Strawberry Perl
+- Make Stardoc add pods to clean_files.
+
+* inc::Package - inc::Module::Install wrapper.
+* Package::Bootstrap - becomes inc/Package.pm
+
+
+> package new --module=Foo::Bar --from=perl/package
+> package new --module=Foo::Bar --from=perl/module-install
+> package new --module=Foo::Bar --from=perl/module-build
