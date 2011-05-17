@@ -1,15 +1,59 @@
 NAME
     Package - Acmeist Module Packaging Toolchain
 
+SYNOPSIS
+    From the command line:
+
+        > pkg new --perl=package --module=Foo::Bar foo-bar-pm
+
+    From a Makefile.PL:
+
+        use inc::Package;
+
+    NOTE: In this package, "Package", the term "package" is used in the
+    Acmeist sense; a collection of software, doc, tests and an installer,
+    all bundled up into a nice little package. It does not refer to the
+    Perl, in memory, namespacing keyword: "package".
+
 DESCRIPTION
     Package is a toolchain for packaging module distributions. Not just Perl
     modules, but modules from many different languages.
 
-STATUS
-    This is a super early, proving concepts, release.
+    This Perl module/distribtion is a little bit overloaded. It supports 3
+    distinct things, outlined below.
 
-    The main thing this module does at this point is offer a Module::Install
-    plugin called Module::Install::Package.
+    NOTE: I did consider releasing these as 3 separate packages, and may do
+    so in the future, but for now it seems (slightly awkward, yet) best to
+    have them all in the Package distribution.
+
+  Package Creation and Maintenance
+    This package installs a command line tool called "pkg", that can be used
+    to create and maintain open source module packages in several
+    programming languages. See pkg and Package::Command for full details.
+
+  A Replacement For inc::Module::Install
+    This Perl package lets you say:
+
+        use inc::Package;
+
+    in your "Makefile.PL", instead of:
+
+        use inc::Module::Install;
+
+    This does everything Module::Install does and more. It does it in a
+    cleaner way, and solves many of the problems that Module::Install users
+    have worked around in various, ugly ways.
+
+    See inc::Package for details.
+
+  Module::Install::Package
+    This Module::Install plugin does all the heavy hitting for
+    "inc::Package". It attempts to fix all the problems of Module::Install,
+    in one go. Yet is really just a Module::Install plugin, like any other,
+    and can be used with or without "inc::Package".
+
+STATUS
+    This is a early, "proving concepts", release. Keep out.
 
 AUTHOR
     Ingy döt Net <ingy@cpan.org>

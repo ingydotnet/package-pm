@@ -10,6 +10,10 @@ use warnings;
 use Mouse;
 extends 'MouseX::App::Cmd';
 
+sub BUILD {
+    die "Sorry, this software is still be developed. Hang in there.";
+}
+
 package Package::Cmd;
 use Mouse;
 

@@ -2,3 +2,80 @@
 
 use Package::Command;
 Package::Command->run;
+
+=encoding utf8
+
+=head1 NAME
+
+pkg - The Acmeist Module Packaging Tool
+
+=head1 SYNOPSIS
+
+    > pkg help
+
+    > pkg new --perl=module-build --module=Foo::Bar foo-bar-pm
+    > pkg new --python=standard --module=foobar foobar-py
+    > pkg new --javascript --module=Foo.Bar foo-bar-js
+    > pkg new --bash --module=foo-bar.sh foo-bar-js
+
+    > cd foo-bar-js; pkg update
+
+=head1 STATUS
+
+This is a new work in progress as of May 17, 2011. Stay tuned...
+
+=head1 DESCRIPTION
+
+C<pkg> is your tool for creating distributable, modular packages, in a variety
+of programming languages.
+
+In some languages, there's more than one way to do it (TMTOWTDI!!). C<pkg>
+accounts for that as well. You can often choose from a selection of packaging
+styles within a given programming language.
+
+=head1 PROJECT GOALS
+
+=over
+
+=item *
+
+Offer a lot of different choices, for popular methods of packaging.
+
+=item *
+
+Provide packaging for languages that don't have their own.
+
+=item *
+
+Keep up with the latest techniques in various languages.
+
+=item *
+
+Be extensible so that people can add their own languages.
+
+=item *
+
+Every package should, at a minimum, offer code, doc, tests and installation
+tools.
+
+=item *
+
+Packages should strive to do more things, like build themselves into Debian
+packages, RPMs and dmg-s, etc.
+
+=back
+
+=head1 AUTHOR
+
+Ingy döt Net <ingy@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (c) 2011. Ingy döt Net.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=cut
