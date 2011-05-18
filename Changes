@@ -1,4 +1,10 @@
 ---
+version: 0.11
+date:    Wed May 18 15:34:33 EST 2011
+changes:
+- Move Module::Install stuff in this distro to Module::Package
+- use inc::Module::Package
+---
 version: 0.10
 date:    Tue May 17 23:44:30 EST 2011
 changes:

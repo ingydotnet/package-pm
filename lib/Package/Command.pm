@@ -1,5 +1,6 @@
 ##
 # name:      Package::Command
+# abstract:  Command support for C<pkg>
 # author:    Ingy döt Net <ingy@cpan.org>
 # copyright: 2011
 # license:   perl
@@ -20,3 +21,7 @@ use Mouse;
 package Package::Cmd::new;
 
 1;
+
+=head1 STATUS
+
+This module is not working yet.
