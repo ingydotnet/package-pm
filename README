@@ -8,9 +8,9 @@ SYNOPSIS
 
         > pkg new \
                 --from=pkg/perl/module-install \
-                --mod=Foo::Bar \
-                --mod=Foo::Bar::Baz \
-                --to=foo-bar-pm \
+                --module=Foo::Bar \
+                --module=Foo::Bar::Baz \
+                foo-bar-pm
 
 DESCRIPTION
     "pkg" is your tool for creating distributable, modular packages, in a

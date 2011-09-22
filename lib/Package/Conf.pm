@@ -11,7 +11,6 @@ use Cwd;
 use File::Spec;
 use IO::All;
 use YAML::XS;
-use XXX;
 
 has src_dir => (is => 'ro');
 has dir_stack => (is => 'rw');

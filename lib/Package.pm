@@ -56,8 +56,6 @@ use Cwd 'abs_path';
 use IO::All;
 use Template::Toolkit::Simple;
 
-use XXX -with => 'YAML::XS';
-
 use constant abstract => 'Create new module package directory from template';
 use constant usage_desc => 'pkg init --from=<dir> --module=<Name> --to=<dir>';
 
@@ -168,9 +166,9 @@ From the command line:
 
     > pkg new \
             --from=pkg/perl/module-install \
-            --mod=Foo::Bar \
-            --mod=Foo::Bar::Baz \
-            --to=foo-bar-pm \
+            --module=Foo::Bar \
+            --module=Foo::Bar::Baz \
+            foo-bar-pm
 
 =head1 DESCRIPTION
 
