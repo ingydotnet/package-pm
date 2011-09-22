@@ -1,24 +1,31 @@
 NAME
-    Package - Acmeist Module Packaging Toolchain
+    Package - The Acmeist Module Package Management Tool
 
 SYNOPSIS
     From the command line:
 
-        > pkg new --perl=package --module=Foo::Bar foo-bar-pm
+        > pkg help
+
+        > pkg new \
+                --from=pkg/perl/module-install \
+                --mod=Foo::Bar \
+                --mod=Foo::Bar::Baz \
+                --to=foo-bar-pm \
 
 DESCRIPTION
-    Package is a toolchain for packaging module distributions. Not just Perl
-    modules, but modules from many different languages.
+    "pkg" is your tool for creating distributable, modular packages, in a
+    variety of programming languages.
 
-    This package installs a command line tool called "pkg", that can be used
-    to create and maintain open source module packages in several
-    programming languages.
+    In some languages, there's more than one way to do it (TMTOWTDI!!).
+    "pkg" accounts for that as well. You can often choose from a selection
+    of packaging styles within a given programming language. You can even
+    easily make your own styles.
 
 MORE DOCUMENTATION
     Coming soon.
 
 STATUS
-    This is a early, "proving concepts", release. Keep out.
+    This is an early release. Keep out.
 
 AUTHOR
     Ingy döt Net <ingy@cpan.org>

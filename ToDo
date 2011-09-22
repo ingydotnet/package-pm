@@ -1,15 +1,12 @@
 == To Do
-- Use pkg/conf.yaml
-- Move package-pkg/perl package-pkg/perl/package
-- make $main::POD overloaded variable
-- Test on Strawberry Perl
-
-== Modules
-* inc::Package - inc::Module::Install wrapper.
-* Package::Bootstrap - becomes inc/Package.pm
+- Use config order:
+  - pkg -f conf.yaml
+  - $PKG_CONF
+  - ./pkg/conf.yaml
+  - $PKG_ROOT/conf.yaml
+  - ~/.pkg/conf.yaml
 
 == Commands
-> package new --module=Foo::Bar --perl
-> package new --module=Foo::Bar --perl=package
-> package new --module=Foo::Bar --perl=module-install
-> package new --module=Foo::Bar --perl=module-build
+> package new --module=Foo::Bar --from=perl/package
+> package new --module=Foo::Bar --from=perl/module-install
+> package new --module=Foo::Bar --from=perl/module-build
