@@ -1,6 +1,6 @@
 ---
 version: 0.12
-date:    
+date:    Thu Sep 22 22:49:10 CEST 2011
 changes:
 - First release as a pkg creation tool.
 ---
