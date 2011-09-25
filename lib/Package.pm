@@ -173,17 +173,34 @@ From the command line:
 =head1 DESCRIPTION
 
 C<pkg> is your tool for creating distributable, modular packages, in a variety
-of programming languages.
+of programming languages. Perl 5 modules for CPAN, Python modules for PyPI,
+Ruby modules for RubyGems, etc.
 
-In some languages, there's more than one way to do it (TMTOWTDI!!). C<pkg>
-accounts for that as well. You can often choose from a selection of packaging
-styles within a given programming language. You can even easily make your own
-styles.
+In truth, pkg is nothing more than a simple way to create a new directory of
+starter files, by applying a set of configuration information to a set of file
+templates. The information is all completely in your control. You can use
+other people's templates or create your own.
+
+=head1 QUICK START
+
+Here's the quick and simple way to get started, assuming you are familiar with
+L<cpanm> and C<git>. From the command line:
+
+    > # Go to the directory where you keep your git repos
+    > cd $HOME/src/
+    > # Get the base pkg directory
+    > git clone https://github.com/ingydotnet/pkg
+    > # Get a basic pkg template. In the case, for a Perl module
+    > git clone https://github.com/ingydotnet/perl-basic-pkg pkg/perl/basic
+    > # Edit the conf files appropriately
+    > edit pkg/pkg.conf pkg/perl/pkg.conf pkg/perl/basic/pkg.conf
+    > # Now create a new perl module in the foo-bar-pm directory
+    > pkg new --module=Foo::Bar --module=Foo::Gorch foo-bar-pm
+    > # Make another new module!
+    > pkg new --module=Foo::Bar --module=Foo::Gorch foo-bar-pm
+
+That was easy.
 
 =head1 MORE DOCUMENTATION
 
-Coming soon.
-
-=head1 STATUS
-
-This is an early release. Keep out.
+Coming soon. :)
