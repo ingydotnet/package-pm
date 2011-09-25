@@ -12,6 +12,8 @@ my $dest = 'xt/foo-pm/';
 
 my $rc = system("pkg new --from=$ENV{HOME}/src/pkg/perl/ingy-modern --module=Foo --module=Foo::Bar $dest");
 
+`rm -fr $dest/.git`;
+
 if ($rc == 0) {
     pass 'command worked';
 }

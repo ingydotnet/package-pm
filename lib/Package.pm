@@ -14,9 +14,10 @@ use IO::All 0.43 ();
 use Template::Toolkit::Simple 0.13 ();
 use YAML::XS 0.35 ();
 
+#------------------------------------------------------------------------------#
 package Package;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
@@ -75,9 +76,18 @@ has module => (
 
 sub execute {
     my ($self, $opt, $args) = @_;
-    my $to = io(shift(@$args) || '.')->absolute;
+    my $pkg_name = shift(@$args) || '';
+    
+    my $to = io($pkg_name || '.')->absolute;
+
+    $pkg_name ||= do {
+        my $cwd = Cwd::cwd;
+        $cwd =~ s!.*/!!;
+        $cwd;
+    };
 
     my $stash = $self->conf->stash;
+    $stash->{pkg}{name} = $pkg_name;
 
     if ($to->exists) {
         die "$to is not empty" if not $to->empty;
@@ -86,6 +96,7 @@ sub execute {
         $to->assert->mkdir;
     }
     $to->chdir or die "Can't chdir to $to";
+    $stash->{module}{name} = $self->module->[0];
 
     my @special;
     for my $file (sort keys %{$self->conf->manifest}) {
@@ -114,6 +125,14 @@ sub execute {
                 ->data($stash)
                 ->render(\$template);
             io($local)->assert->print($text);
+        }
+    }
+
+    if ($stash->{git}{create}) {
+        system("git init; git add .; git commit -m 'First commit'");
+        if (my $url = $stash->{git}{origin}) {
+            $url =~ s/\%pkg\.name\%/$stash->{pkg}{name}/e;
+            system("git remote add origin $url");
         }
     }
 
@@ -186,18 +205,18 @@ other people's templates or create your own.
 Here's the quick and simple way to get started, assuming you are familiar with
 L<cpanm> and C<git>. From the command line:
 
-    > # Go to the directory where you keep your git repos
+    > # Go to the directory where you keep your git repos:
     > cd $HOME/src/
-    > # Get the base pkg directory
+    > # Get the base pkg directory:
     > git clone https://github.com/ingydotnet/pkg
-    > # Get a basic pkg template. In the case, for a Perl module
+    > # Get a basic pkg template. In the case, for a Perl module:
     > git clone https://github.com/ingydotnet/perl-basic-pkg pkg/perl/basic
     > # Edit the conf files appropriately
     > edit pkg/pkg.conf pkg/perl/pkg.conf pkg/perl/basic/pkg.conf
     > # Now create a new perl module in the foo-bar-pm directory
-    > pkg new --module=Foo::Bar --module=Foo::Gorch foo-bar-pm
+    > pkg new --from=pkg/perl/basic --module=Foo::Bar --module=Foo::Gorch foo-bar-pm
     > # Make another new module!
-    > pkg new --module=Foo::Bar --module=Foo::Gorch foo-bar-pm
+    > pkg new --from=pkg/perl/basic --module=Bar::Bar bar-bar-pm
 
 That was easy.
 

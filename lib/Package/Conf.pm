@@ -31,13 +31,18 @@ sub BUILD {
             or die "$dir contains no pkg.conf file";
         unshift @dirs, $dir;
         my $conf = YAML::XS::LoadFile($conf_file);
-        last if $conf->{pkg_top_level_dir};
+        last if $conf->{pkg}{top};
         my @dir = File::Spec->splitdir($dir) or die;
         pop @dir;
         $dir = File::Spec->catdir(@dir) or die;
     }
 
-    my $stash = {};
+    my $stash = {
+        date => {
+            year => (localtime)[5] + 1900,
+            time => do { $_ = `date`; chomp; $_ },
+        },
+    };
     my $manifest = {};
     for (my $i = 0; $i < @dirs; $i++) {
         my $dir = $dirs[$i];

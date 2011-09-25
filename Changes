@@ -1,4 +1,10 @@
 ---
+version: 0.13
+date:    Sun Sep 25 22:16:28 CEST 2011
+changes:
+- More doc and some refactoring
+- Released from Liz++ and Wendy++'s Basement Comic Book Room!
+---
 version: 0.12
 date:    Thu Sep 22 22:49:10 CEST 2011
 changes:
