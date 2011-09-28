@@ -74,6 +74,14 @@ has module => (
     documentation => 'Name of new module',
 );
 
+has tagline => (
+    is => 'ro',
+    isa => 'Str',
+    default => sub { '' },
+    required => 0,
+    documentation => 'Tagline for package',
+);
+
 sub execute {
     my ($self, $opt, $args) = @_;
     my $pkg_name = shift(@$args) || '';
@@ -88,6 +96,7 @@ sub execute {
 
     my $stash = $self->conf->stash;
     $stash->{pkg}{name} = $pkg_name;
+    $stash->{tagline} = $self->tagline;
 
     if ($to->exists) {
         die "$to is not empty" if not $to->empty;
@@ -133,6 +142,14 @@ sub execute {
         if (my $url = $stash->{git}{origin}) {
             $url =~ s/\%pkg\.name\%/$stash->{pkg}{name}/e;
             system("git remote add origin $url");
+        }
+        # XXX Check Net::Ping->new->ping("github.com");
+        if (my $github = $stash->{git}{github}) {
+            my $login = $github->{login};
+            my $token = $github->{token};
+            my $tagline = $stash->{tagline};
+            system(qq{curl -F login=$login -F token=$token https://github.com/api/v2/yaml/repos/create -F name=$pkg_name -F "description=$tagline"});
+            system("git push origin master");
         }
     }
 
