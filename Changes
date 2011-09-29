@@ -1,4 +1,10 @@
 ---
+version: 0.14
+date:    Thu Sep 29 20:41:41 CEST 2011
+changes:
+- Even more doc and refactoring
+- Released from Liz++ and Wendy++'s Harry Potter Room!
+---
 version: 0.13
 date:    Sun Sep 25 22:16:28 CEST 2011
 changes:
