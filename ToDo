@@ -1,4 +1,7 @@
 == To Do
+- All extra options go into stash
+- Any single variable can go in path
+- Config can map cmd args to stash vars
 - Use config order:
   - pkg -f conf.yaml
   - $PKG_CONF

@@ -60,13 +60,6 @@ use Template::Toolkit::Simple;
 use constant abstract => 'Create new module package directory from template';
 use constant usage_desc => 'pkg init --from=<dir> --module=<Name> --to=<dir>';
 
-has from => (
-    is => 'ro',
-    isa => 'Str',
-    required => 1,
-    documentation => 'Pkg template directory',
-);
-
 has module => (
     is => 'ro',
     isa => 'Str',
@@ -143,17 +136,43 @@ sub execute {
             $url =~ s/\%pkg\.name\%/$stash->{pkg}{name}/e;
             system("git remote add origin $url");
         }
-        # XXX Check Net::Ping->new->ping("github.com");
-        if (my $github = $stash->{git}{github}) {
-            my $login = $github->{login};
-            my $token = $github->{token};
-            my $tagline = $stash->{tagline};
-            system(qq{curl -F login=$login -F token=$token https://github.com/api/v2/yaml/repos/create -F name=$pkg_name -F "description=$tagline"});
-            system("git push origin master");
-        }
+        $self->create_git_repo($pkg_name, $stash->{tagline});
     }
 
     print "New package '$to' successfully created!\n";
+}
+
+#------------------------------------------------------------------------------#
+package Package::Command::repo;
+Package->import( -command );
+use Mouse;
+extends 'Package::Command';
+
+use constant abstract => 'Create a new repo on github';
+use constant usage_desc => 'pkg repo --from=<dir>';
+
+sub execute {
+    my ($self, $opt, $args) = @_;
+    die "Directory has no git repo"
+        unless -d '.git';
+
+    my $stash = $self->conf->stash;
+    for (@$args) {
+        if (/^--(\w+)=(.*)/) {
+            my ($k, $v) = ($1, $2);
+            # $v =~ s/^'(.*)'$/$1/;
+            # $v =~ s/^"(.*)"$/$1/;
+            $stash->{$k} = $v;
+        }
+    }
+
+    my $pkg_name = do {
+        my $cwd = Cwd::cwd;
+        $cwd =~ s!.*/!!;
+        $cwd;
+    };
+
+    $self->create_git_repo($pkg_name, $stash->{tagline});
 }
 
 #------------------------------------------------------------------------------#
@@ -163,21 +182,23 @@ use Mouse;
 extends 'Package::Command';
 
 use constant abstract => 'Print list of config variables from template';
-use constant usage_desc => 'pkg liastvars --from=<dir>';
-
-has from => (
-    is => 'ro',
-    isa => 'Str',
-    documentation => 'Pkg template directory',
-);
+use constant usage_desc => 'pkg listvars --from=<dir>';
 
 sub execute {
     my ($self, $opt, $args) = @_;
-    print YAML::XS::Dump($self->get_stash);
+    print YAML::XS::Dump($self->conf->stash);
 }
 
 #------------------------------------------------------------------------------#
 package Package::Command;
+
+has from => (
+    is => 'ro',
+    isa => 'Str',
+    required => 1,
+    default => $ENV{PKG_ROOT},
+    documentation => 'Pkg template directory',
+);
 
 has _conf => (
     is => 'ro',
@@ -191,6 +212,18 @@ has _conf => (
         );
     },
 );
+
+sub create_git_repo {
+    my ($self, $pkg_name, $tagline) = @_;
+    my $stash = $self->conf->stash;
+    # XXX Check Net::Ping->new->ping("github.com");
+    if (my $github = $stash->{git}{github}) {
+        my $login = $github->{login};
+        my $token = $github->{token};
+        system(qq{curl -F login=$login -F token=$token https://github.com/api/v2/yaml/repos/create -F name=$pkg_name -F "description=$tagline"});
+        system("git push origin master");
+    }
+}
 
 1;
 
