@@ -9,15 +9,37 @@ use Mouse;
 
 use Cwd;
 use File::Spec;
+use Hash::Merge;
 use IO::All;
 use YAML::XS;
 
-has src_dir => (is => 'ro');
-has dir_stack => (is => 'rw');
-has stash => (is => 'rw');
-has manifest => (is => 'rw');
+our $author_name_hack;
 
-sub BUILD {
+has src_dir => (
+    is => 'ro',
+    required => 1,
+);
+has cli_args => (
+    is => 'ro',
+    required => 1,
+);
+has dirs => (
+    is => 'ro',
+    builder => 'dirs_builder',
+    lazy => 1,
+);
+has stash => (
+    is => 'ro',
+    builder => 'stash_builder',
+    lazy => 1,
+);
+has manifest => (
+    is => 'ro',
+    builder => 'manifest_builder',
+    lazy => 1,
+);
+
+sub dirs_builder {
     my ($self) = @_;
     my $home = Cwd::cwd;
     my $dir = $self->src_dir;
@@ -36,16 +58,158 @@ sub BUILD {
         pop @dir;
         $dir = File::Spec->catdir(@dir) or die;
     }
+    chdir $home or die;
+    return \@dirs;
+}
 
-    my $stash = {
-        date => {
-            year => (localtime)[5] + 1900,
-            time => do { $_ = `date`; chomp; $_ },
-        },
-    };
+sub manifest_builder {
+    my ($self) = @_;
     my $manifest = {};
-    for (my $i = 0; $i < @dirs; $i++) {
-        my $dir = $dirs[$i];
+    $self->tree_walker(manifest => sub {
+        my ($name, $path) = @_;
+        $manifest->{$name} = Cwd::abs_path($path);
+    });
+    return $manifest;
+}
+
+sub stash_builder {
+    my ($self) = @_;
+    my $stash = {};
+    $self->tree_walker(stash => sub {
+        my $hash = YAML::XS::LoadFile('pkg.conf') || {};
+        $author_name_hack ||= $hash->{author}{name};
+        $stash = Hash::Merge::merge($hash, $stash);
+    });
+    $stash->{date}{year} = (localtime)[5] + 1900;
+    $stash->{date}{time} = do { $_ = `date`; chomp; $_ };
+    $stash = Hash::Merge::merge(
+        $self->cli_args_hash, $stash,
+    );
+    my @keys = keys %$stash;
+    for my $k (@keys) {
+        next unless $k =~ /\./;
+        $stash = Hash::Merge::merge(
+            $self->hashlet($k, delete $stash->{$k}),
+            $stash,
+        );
+    }
+
+    $self->{stash} = $stash;
+    if (my $rules = delete $stash->{pkg}{rules}) {
+        my @keys = keys %$rules;
+        for my $k (@keys) {
+            my $hash = $self->hashlet($k, $self->apply($rules->{$k}));
+            delete $stash->{$k};
+            $self->{stash} = $stash = Hash::Merge::merge(
+                $hash,
+                $stash,
+            );
+        }
+    }
+    
+    return $stash;
+}
+
+my %methods = (
+    (
+        map {($_, "apply_$_")}
+        qw[ replace tree_to_list ],
+    ),
+    '=' => 'apply_assign',
+);
+
+sub apply {
+    my ($self, $rule) = @_;
+    my ($method, @args) = @$rule;
+    die "$method rule not supported" unless defined $methods{$method};
+    $method = $methods{$method};
+    $self->$method(@args);
+}
+
+sub apply_assign {
+    my ($self, $key) = @_;
+    return $self->lookup($key);
+}
+
+sub apply_replace {
+    my ($self, $key, $pat, $rep) = @_;
+    my $val = $self->lookup($key);
+    if (ref $val) {
+        return [
+            map {
+                my $v = $_;
+                $v =~ s/$pat/$rep/g;
+                $v;
+            } @$val
+        ];
+    }
+    $val =~ s/$pat/$rep/g;
+    return $val;
+}
+
+sub apply_tree_to_list {
+    my ($self, $key) = @_;
+    my $val = $self->lookup($key);
+    my (@keys) = keys %$val;
+    my $a = $val->{$keys[0]};
+    return [$val] unless ref $a;
+    my $list = [];
+    for (my $i = 0; $i < @$a; $i++) {
+        push @$list, {
+            map { 
+                ($_ => $val->{$_}[$i])
+            } @keys
+        };
+    }
+    return $list;
+}
+
+sub lookup {
+    my ($self, $k, $v) = @_;
+    $v ||= $self->{stash};
+    while ($k =~ s/(.*?)\.//) {
+        $v = $v->{$1};
+    }
+    return $v->{$k};
+}
+
+sub hashlet {
+    my ($self, $k, $v) = @_;
+    my $h = {};
+    my $p = $h;
+    while ($k =~ s/(.*?)\.//) {
+        $p = $p->{$1} = {};
+    }
+    $p->{$k} = $v;
+    return $h;
+}
+
+sub cli_args_hash {
+    my ($self) = @_;
+    my $hash = {};
+    my $args = $self->cli_args;
+    for my $arg (@$args) {
+        $arg =~ /^--([\w\.]+)(?:=(.*))?$/ or next;
+        my ($k, $v) = ($1, $2);
+        $v = 1 if not defined $v;
+        if (exists $hash->{$k}) {
+            $hash->{$k} = [$hash->{$k}]
+                unless ref $hash->{$k} eq 'ARRAY';
+            push @{$hash->{$k}}, $2;
+        }
+        else {
+            $hash->{$1} = $2;
+        }
+    }
+    return $hash;
+}
+
+sub tree_walker {
+    my ($self, $type, $callback) = @_;
+    my $home = Cwd::cwd;
+    my $dirs = $self->dirs;
+    for (my $i = 0; $i < @$dirs; $i++) {
+        my $dir = $dirs->[$i];
         chdir $dir;
         File::Find::find(sub {
             if (-f 'pkg.conf' and $File::Find::dir ne $File::Find::topdir) {
@@ -53,9 +217,9 @@ sub BUILD {
                 return;
             }
             if ($i == 0) {
-                $stash = Hash::Merge::merge(
-                    $stash, YAML::XS::LoadFile('pkg.conf'),
-                );
+                if ($type eq 'stash') {
+                    $callback->();
+                }
                 $File::Find::prune = 1;
                 return;
             }
@@ -64,18 +228,19 @@ sub BUILD {
                 return;
             }
             if ($_ eq 'pkg.conf') {
-                $stash = Hash::Merge::merge(
-                    $stash, YAML::XS::LoadFile('pkg.conf'),
-                );
+                if ($type eq 'stash') {
+                    $callback->();
+                }
                 return;
             }
+            return if /^\./;
             return if -d;
-            $manifest->{$File::Find::name} = Cwd::abs_path($_);
+            if ($type eq 'manifest') {
+                $callback->($File::Find::name, $_);
+            }
         }, '.');
     }
-    $self->manifest($manifest);
-    $self->stash($stash);
-    chdir $home or die;
+    chdir $home;
 }
 
 1;

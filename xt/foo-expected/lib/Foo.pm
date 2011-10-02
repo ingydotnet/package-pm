@@ -1,7 +1,7 @@
 ##
 # name:      Foo
-# abstract:  
-# author:    Ingy döt Net <ingy@ingy.net>
+# abstract:  Best Foo module ever
+# author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
 # copyright: 2011
 
@@ -10,6 +10,8 @@ use strict;
 use warnings;
 
 package Foo;
+
+our $VERSION = '0.10';
 
 1;
 

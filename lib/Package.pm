@@ -60,24 +60,10 @@ use Template::Toolkit::Simple;
 use constant abstract => 'Create new module package directory from template';
 use constant usage_desc => 'pkg init --from=<dir> --module=<Name> --to=<dir>';
 
-has module => (
-    is => 'ro',
-    isa => 'Str',
-    isa => 'ArrayRef[Str]',
-    documentation => 'Name of new module',
-);
-
-has tagline => (
-    is => 'ro',
-    isa => 'Str',
-    default => sub { '' },
-    required => 0,
-    documentation => 'Tagline for package',
-);
-
 sub execute {
     my ($self, $opt, $args) = @_;
-    my $pkg_name = shift(@$args) || '';
+    my $pkg_name = pop(@$args) || '';
+    $self->_args($args);
     
     my $to = io($pkg_name || '.')->absolute;
 
@@ -89,7 +75,7 @@ sub execute {
 
     my $stash = $self->conf->stash;
     $stash->{pkg}{name} = $pkg_name;
-    $stash->{tagline} = $self->tagline;
+    $stash->{author}{name} = $Package::Conf::author_name_hack;
 
     if ($to->exists) {
         die "$to is not empty" if not $to->empty;
@@ -98,36 +84,27 @@ sub execute {
         $to->assert->mkdir;
     }
     $to->chdir or die "Can't chdir to $to";
-    $stash->{module}{name} = $self->module->[0];
 
-    my @special;
     for my $file (sort keys %{$self->conf->manifest}) {
-        if ($file =~ /%/) {
-            push @special, $file;
+        if (not $file =~ /%(.*?)%/) {
+            $self->write_file($file, $file);
             next;
         }
-        my $path = $self->conf->manifest->{$file};
-        my $template = io($path)->all;
-        my $text = tt
-            ->path([])
-            ->data($stash)
-            ->render(\$template);
-        io($file)->assert->print($text);
-    }
-
-    for my $module (@{$self->module}) {
-        $stash->{module}{name} = $module;
-        ($stash->{module}{path} = $module) =~ s!::!/!g;
-        for my $file (@special) {
-            my $path = $self->conf->manifest->{$file};
-            my $template = io($path)->all;
-            (my $local = $file) =~ s!%module\.path%!$stash->{module}{path}!;
-            my $text = tt
-                ->path([])
-                ->data($stash)
-                ->render(\$template);
-            io($local)->assert->print($text);
+        my $key = $1;
+        if ($key =~ /(.*?)\.(.*)/) {
+            my ($k1, $k2) = ($1, $2);
+            if (ref(my $array = $stash->{$k1})) {
+                delete $stash->{$k1};
+                for my $elem (@$array) {
+                    my $path = $self->conf->lookup($k2, $elem);
+                    $stash->{$k1} = $elem;
+                    (my $f = $file) =~ s/%.*?%/$path/;
+                    $self->write_file($f, $file);
+                }
+                next;
+            }
         }
+        die my $path = $self->conf->lookup($key);
     }
 
     if ($stash->{git}{create}) {
@@ -140,6 +117,17 @@ sub execute {
     }
 
     print "New package '$to' successfully created!\n";
+}
+
+sub write_file {
+    my ($self, $file, $key) = @_;
+    my $path = $self->conf->manifest->{$key};
+    my $template = io($path)->all;
+    my $text = tt
+        ->path([])
+        ->data($self->conf->stash)
+        ->render(\$template);
+    io($file)->assert->print($text);
 }
 
 #------------------------------------------------------------------------------#
@@ -196,7 +184,6 @@ has from => (
     is => 'ro',
     isa => 'Str',
     required => 1,
-    default => $ENV{PKG_ROOT},
     documentation => 'Pkg template directory',
 );
 
@@ -209,8 +196,14 @@ has _conf => (
         my ($self) = @_;
         Package::Conf->new(
             src_dir => $self->from,
+            cli_args => $self->_args,
         );
     },
+);
+
+has _args => (
+    is => 'rw',
+    default => sub {[]},
 );
 
 sub create_git_repo {

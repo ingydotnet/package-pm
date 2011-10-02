@@ -10,7 +10,20 @@ $ENV{PATH} = abs_path('bin') . ":$ENV{PATH}";
 my $dest = 'xt/foo-pm/';
 `rm -fr $dest`;
 
-my $rc = system("pkg new --from=$ENV{HOME}/src/pkg/perl/ingy-modern --module=Foo --module=Foo::Bar $dest");
+my $home = $ENV{HOME};
+my $cmd = join ' ', qw[
+    pkg
+    new
+    --tagline='Best Foo module ever'
+],
+    "--from=$ENV{HOME}/src/pkg/perl/ingy-modern",
+qw[
+    --unit=Foo
+    --unit=Foo::Bar
+    --git.create=0
+], $dest;
+
+my $rc = system($cmd);
 
 `rm -fr $dest/.git`;
 
@@ -23,7 +36,7 @@ else {
 }
 
 my $diff = capture_merged {
-    system("diff -ru $dest xt/foo-expected");
+    system("diff -ru xt/foo-expected $dest");
 };
 if (not length $diff) {
     pass 'new Foo is correct';
