@@ -92,8 +92,9 @@ sub execute {
         }
         my $key = $1;
         if ($key =~ /(.*?)\.(.*)/) {
+            use XXX;
             my ($k1, $k2) = ($1, $2);
-            if (ref(my $array = $stash->{$k1})) {
+            if (ref(my $array = $stash->{$k1}) eq 'ARRAY') {
                 delete $stash->{$k1};
                 for my $elem (@$array) {
                     my $path = $self->conf->lookup($k2, $elem);
@@ -104,7 +105,9 @@ sub execute {
                 next;
             }
         }
-        die my $path = $self->conf->lookup($key);
+        my $path = $self->conf->lookup($key);
+        (my $f = $file) =~ s/%.*?%/$path/;
+        $self->write_file($f, $file);
     }
 
     if ($stash->{git}{create}) {
@@ -128,6 +131,9 @@ sub write_file {
         ->data($self->conf->stash)
         ->render(\$template);
     io($file)->assert->print($text);
+    if (-x $path) {
+        chmod 0755, $file;
+    }
 }
 
 #------------------------------------------------------------------------------#

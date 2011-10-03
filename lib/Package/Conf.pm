@@ -106,6 +106,14 @@ sub stash_builder {
             );
         }
     }
+
+    for my $k (keys %$stash) {
+        if (ref($stash->{$k}) eq 'ARRAY' and
+            @{$stash->{$k}} == 1
+        ) {
+            $stash->{$k} = $stash->{$k}[0];
+        }
+    }
     
     return $stash;
 }
