@@ -60,6 +60,14 @@ use Template::Toolkit::Simple;
 use constant abstract => 'Create new module package directory from template';
 use constant usage_desc => 'pkg init --from=<dir> --module=<Name> --to=<dir>';
 
+has dryrun => (
+    is => 'ro',
+    isa => 'Bool',
+    default => 0,
+    documentation => 'Create new package but skip git',
+);
+
+
 sub execute {
     my ($self, $opt, $args) = @_;
     my $pkg_name = pop(@$args) || '';
@@ -92,7 +100,6 @@ sub execute {
         }
         my $key = $1;
         if ($key =~ /(.*?)\.(.*)/) {
-            use XXX;
             my ($k1, $k2) = ($1, $2);
             if (ref(my $array = $stash->{$k1}) eq 'ARRAY') {
                 delete $stash->{$k1};
@@ -111,6 +118,20 @@ sub execute {
     }
 
     if ($stash->{git}{create}) {
+        if ($self->dryrun) {
+            (my $url = $stash->{git}{origin}) =~
+                s/\%pkg\.name\%/$stash->{pkg}{name}/e;
+            print <<"...";
+New package '$to' successfully created, but GitHub repo creation skipped.
+
+The GitHub info would be:
+
+    origin: $url
+    repo:   $pkg_name
+    desc:   $stash->{tagline}
+...
+            return;
+        }
         system("git init; git add .; git commit -m 'First commit'");
         if (my $url = $stash->{git}{origin}) {
             $url =~ s/\%pkg\.name\%/$stash->{pkg}{name}/e;

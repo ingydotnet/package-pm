@@ -96,9 +96,9 @@ sub stash_builder {
 
     $self->{stash} = $stash;
     if (my $rules = delete $stash->{pkg}{rules}) {
-        my @keys = keys %$rules;
-        for my $k (@keys) {
-            my $hash = $self->hashlet($k, $self->apply($rules->{$k}));
+        for my $rule (@$rules) {
+            my $k = shift @$rule;
+            my $hash = $self->hashlet($k, $self->apply($rule));
             delete $stash->{$k};
             $self->{stash} = $stash = Hash::Merge::merge(
                 $hash,
@@ -107,34 +107,19 @@ sub stash_builder {
         }
     }
 
-    for my $k (keys %$stash) {
-        if (ref($stash->{$k}) eq 'ARRAY' and
-            @{$stash->{$k}} == 1
-        ) {
-            $stash->{$k} = $stash->{$k}[0];
-        }
-    }
-    
     return $stash;
 }
-
-my %methods = (
-    (
-        map {($_, "apply_$_")}
-        qw[ replace tree_to_list ],
-    ),
-    '=' => 'apply_assign',
-);
 
 sub apply {
     my ($self, $rule) = @_;
     my ($method, @args) = @$rule;
-    die "$method rule not supported" unless defined $methods{$method};
-    $method = $methods{$method};
+    $method = "apply_$method";
+    die "$method rule not supported"
+        unless $self->can($method);
     $self->$method(@args);
 }
 
-sub apply_assign {
+sub apply_is {
     my ($self, $key) = @_;
     return $self->lookup($key);
 }
@@ -153,23 +138,6 @@ sub apply_replace {
     }
     $val =~ s/$pat/$rep/g;
     return $val;
-}
-
-sub apply_tree_to_list {
-    my ($self, $key) = @_;
-    my $val = $self->lookup($key);
-    my (@keys) = keys %$val;
-    my $a = $val->{$keys[0]};
-    return [$val] unless ref $a;
-    my $list = [];
-    for (my $i = 0; $i < @$a; $i++) {
-        push @$list, {
-            map { 
-                ($_ => $val->{$_}[$i])
-            } @keys
-        };
-    }
-    return $list;
 }
 
 sub lookup {
