@@ -14,12 +14,11 @@ my $home = $ENV{HOME};
 my $cmd = join ' ', qw[
     pkg
     new
-    --tagline='Best Foo module ever'
+    --desc='Best Foo module ever'
 ],
     "--from=$ENV{HOME}/src/pkg/perl/ingy-modern",
 qw[
-    --unit=Foo
-    --unit=Foo::Bar
+    --module=Foo::Bar
     --git.create=0
 ], $dest;
 

@@ -17,7 +17,7 @@ use YAML::XS 0.35 ();
 #------------------------------------------------------------------------------#
 package Package;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
@@ -86,7 +86,13 @@ sub execute {
     $stash->{author}{name} = $Package::Conf::author_name_hack;
 
     if ($to->exists) {
-        die "$to is not empty" if not $to->empty;
+        die <<"..." if not $to->empty;
+$to is not an empty directory.
+Can't make a new pkg here.
+
+Either specify the name of a new directory you wish to create,
+or name an empty directory, or cd to an empty directory.
+...
     }
     else {
         $to->assert->mkdir;
@@ -99,26 +105,14 @@ sub execute {
             next;
         }
         my $key = $1;
-        if ($key =~ /(.*?)\.(.*)/) {
-            my ($k1, $k2) = ($1, $2);
-            if (ref(my $array = $stash->{$k1}) eq 'ARRAY') {
-                delete $stash->{$k1};
-                for my $elem (@$array) {
-                    my $path = $self->conf->lookup($k2, $elem);
-                    $stash->{$k1} = $elem;
-                    (my $f = $file) =~ s/%.*?%/$path/;
-                    $self->write_file($f, $file);
-                }
-                next;
-            }
-        }
-        my $path = $self->conf->lookup($key);
+        my $path = $self->conf->lookup($key)
+            or die "Config variable '$key' is not defined.\n";
         (my $f = $file) =~ s/%.*?%/$path/;
         $self->write_file($f, $file);
     }
 
     if ($stash->{git}{create}) {
-        if ($self->dryrun) {
+        if ($self->dryrun or $to =~ /^.*\/[xyz]{1,5}\d?$/) {
             (my $url = $stash->{git}{origin}) =~
                 s/\%pkg\.name\%/$stash->{pkg}{name}/e;
             print <<"...";
@@ -128,7 +122,7 @@ The GitHub info would be:
 
     origin: $url
     repo:   $pkg_name
-    desc:   $stash->{tagline}
+    desc:   $stash->{desc}
 ...
             return;
         }
@@ -137,7 +131,7 @@ The GitHub info would be:
             $url =~ s/\%pkg\.name\%/$stash->{pkg}{name}/e;
             system("git remote add origin $url");
         }
-        $self->create_git_repo($pkg_name, $stash->{tagline});
+        $self->create_git_repo($pkg_name, $stash->{desc});
     }
 
     print "New package '$to' successfully created!\n";
@@ -147,10 +141,19 @@ sub write_file {
     my ($self, $file, $key) = @_;
     my $path = $self->conf->manifest->{$key};
     my $template = io($path)->all;
-    my $text = tt
+    my $text = eval {
+        tt
         ->path([])
+        ->strict(1)
         ->data($self->conf->stash)
         ->render(\$template);
+    };
+    if ($@) {
+        if ($@ =~ /var\.undef error - undefined variable: (\S+)/) {
+            die "Config variable '$1' is not defined.\n";
+        }
+        die $@;
+    }
     io($file)->assert->print($text);
     if (-x $path) {
         chmod 0755, $file;
@@ -187,7 +190,7 @@ sub execute {
         $cwd;
     };
 
-    $self->create_git_repo($pkg_name, $stash->{tagline});
+    $self->create_git_repo($pkg_name, $stash->{desc});
 }
 
 #------------------------------------------------------------------------------#
@@ -234,13 +237,13 @@ has _args => (
 );
 
 sub create_git_repo {
-    my ($self, $pkg_name, $tagline) = @_;
+    my ($self, $pkg_name, $desc) = @_;
     my $stash = $self->conf->stash;
     # XXX Check Net::Ping->new->ping("github.com");
     if (my $github = $stash->{git}{github}) {
         my $login = $github->{login};
         my $token = $github->{token};
-        system(qq{curl -F login=$login -F token=$token https://github.com/api/v2/yaml/repos/create -F name=$pkg_name -F "description=$tagline"});
+        system(qq{curl -F login=$login -F token=$token https://github.com/api/v2/yaml/repos/create -F name=$pkg_name -F "description=$desc"});
         system("git push origin master");
     }
 }

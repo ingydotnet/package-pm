@@ -97,45 +97,70 @@ sub stash_builder {
     $self->{stash} = $stash;
     if (my $rules = delete $stash->{pkg}{rules}) {
         for my $rule (@$rules) {
-            my $k = shift @$rule;
-            my $hash = $self->hashlet($k, $self->apply($rule));
-            delete $stash->{$k};
-            $self->{stash} = $stash = Hash::Merge::merge(
-                $hash,
-                $stash,
-            );
+            $self->apply($rule);
         }
     }
+    $stash = $self->{stash};
 
     return $stash;
 }
 
 sub apply {
     my ($self, $rule) = @_;
-    my ($method, @args) = @$rule;
-    $method = "apply_$method";
+    $rule;
+    my $method = $self->get_method($rule);
     die "$method rule not supported"
         unless $self->can($method);
-    $self->$method(@args);
+    return $self->$method($rule);
 }
 
-sub apply_is {
-    my ($self, $key) = @_;
+sub get_method {
+    my ($self, $args) = @_;
+    return "apply_" . shift @$args;
+}
+
+sub get_arg {
+    my ($self, $args) = @_;
+    my $arg = shift @$args;
+    return ref($arg)
+    ? $self->apply($arg)
+    : $arg;
+}
+
+sub set_value {
+    my ($self, $key, $value) = @_;
+    my $hash = $self->hashlet($key, $value);
+    my $stash = $self->{stash};
+    delete $stash->{$key};
+    $self->{stash} = Hash::Merge::merge(
+        $hash,
+        $stash,
+    );
+    return $value;
+}
+
+sub apply_get {
+    my ($self, $args) = @_;
+    my $key = $self->get_arg($args);
     return $self->lookup($key);
 }
 
+sub apply_init {
+    my ($self, $args) = @_;
+    my $name = $self->get_arg($args);
+    my $value = $self->lookup($name);
+    return $value if defined $value;
+    $value = $self->get_arg($args);
+    return unless defined $value;
+    return $self->set_value($name, $value);
+}
+
 sub apply_replace {
-    my ($self, $key, $pat, $rep) = @_;
-    my $val = $self->lookup($key);
-    if (ref $val) {
-        return [
-            map {
-                my $v = $_;
-                $v =~ s/$pat/$rep/g;
-                $v;
-            } @$val
-        ];
-    }
+    my ($self, $args) = @_;
+    my $val = $self->get_arg($args);
+    my $pat = $self->get_arg($args);
+    my $rep = $self->get_arg($args);
+    return unless defined $val;
     $val =~ s/$pat/$rep/g;
     return $val;
 }
@@ -146,6 +171,7 @@ sub lookup {
     while ($k =~ s/(.*?)\.//) {
         $v = $v->{$1};
     }
+    return unless defined $v and ref($v) eq 'HASH';
     return $v->{$k};
 }
 

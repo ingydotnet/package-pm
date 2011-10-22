@@ -1,6 +1,6 @@
 ---
 version: 0.15
-date:    
+date:    Fri Oct 21 18:32:55 PDT 2011
 changes:
 - Add a 'repo' subcommand
 ---
