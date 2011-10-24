@@ -1,9 +1,10 @@
 ##
 # name:      Package::Conf
-# abstract:  Config Class for Package
+# abstract:  Configuration for Package
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
 # copyright: 2011
+
 package Package::Conf;
 use Mouse;
 
@@ -13,13 +14,15 @@ use Hash::Merge;
 use IO::All;
 use YAML::XS;
 
-our $author_name_hack;
-
 has src_dir => (
     is => 'ro',
     required => 1,
 );
 has cli_args => (
+    is => 'ro',
+    required => 1,
+);
+has pkg_name => (
     is => 'ro',
     required => 1,
 );
@@ -66,10 +69,23 @@ sub manifest_builder {
     my ($self) = @_;
     my $manifest = {};
     $self->tree_walker(manifest => sub {
-        my ($name, $path) = @_;
+        my ($name, $path, $conf) = @_;
+        my $list = $conf->{pkg}{ignore} || [];
+        return if grep {$path eq $_} @$list;
+        delete $manifest->{"./$_"} for @{delete($conf->{pkg}{remove}) || []};
         $manifest->{$name} = Cwd::abs_path($path);
     });
     return $manifest;
+}
+
+# ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
+sub date_hash {
+    my @t = localtime;
+    my $hash = {
+        year => $t[5] + 1900,
+        time => scalar(localtime),
+    };
+    return $hash;
 }
 
 sub stash_builder {
@@ -77,11 +93,11 @@ sub stash_builder {
     my $stash = {};
     $self->tree_walker(stash => sub {
         my $hash = YAML::XS::LoadFile('pkg.conf') || {};
-        $author_name_hack ||= $hash->{author}{name};
         $stash = Hash::Merge::merge($hash, $stash);
     });
-    $stash->{date}{year} = (localtime)[5] + 1900;
-    $stash->{date}{time} = do { $_ = `date`; chomp; $_ };
+    $stash->{env} = {%ENV};
+    $stash->{date} = $self->date_hash;
+    $stash->{pkg}{name} = $self->pkg_name;
     $stash = Hash::Merge::merge(
         $self->cli_args_hash, $stash,
     );
@@ -95,28 +111,49 @@ sub stash_builder {
     }
 
     $self->{stash} = $stash;
-    if (my $rules = delete $stash->{pkg}{rules}) {
-        for my $rule (@$rules) {
-            $self->apply($rule);
+    if (my $transforms = delete $stash->{pkg}{transforms}) {
+        for my $transform (@$transforms) {
+            $self->apply($transform);
         }
     }
-    $stash = $self->{stash};
 
-    return $stash;
+    for (1..5) {
+        $self->expand_refs($self->{stash});
+    }
+
+    # XXX Hack because something (Hash::Merge?) messes up my name!
+    use Encode;
+    Encode::_utf8_on($self->{stash}{author}{name});
+
+    return $self->{stash};
+}
+
+sub expand_refs {
+    my ($self, $hash) = @_;
+    for my $k (keys %$hash) {
+        my $v = $hash->{$k};
+        if (ref($v) eq 'HASH') {
+            $self->expand_refs($v);
+        }
+        elsif (not ref($v)) {
+            next unless $v =~ /\%([^\%]+)\%/;
+            my $x = $1;
+            $hash->{$k} =~ s/(\%([^\%]+)\%)/$self->lookup($2) || $1/e;
+        }
+    }
 }
 
 sub apply {
-    my ($self, $rule) = @_;
-    $rule;
-    my $method = $self->get_method($rule);
-    die "$method rule not supported"
+    my ($self, $transform) = @_;
+    my $method = $self->get_method($transform);
+    die "$method transform not supported"
         unless $self->can($method);
-    return $self->$method($rule);
+    return $self->$method($transform);
 }
 
 sub get_method {
     my ($self, $args) = @_;
-    return "apply_" . shift @$args;
+    return "transform_" . shift @$args;
 }
 
 sub get_arg {
@@ -139,13 +176,13 @@ sub set_value {
     return $value;
 }
 
-sub apply_get {
+sub transform_get {
     my ($self, $args) = @_;
     my $key = $self->get_arg($args);
     return $self->lookup($key);
 }
 
-sub apply_init {
+sub transform_init {
     my ($self, $args) = @_;
     my $name = $self->get_arg($args);
     my $value = $self->lookup($name);
@@ -155,7 +192,7 @@ sub apply_init {
     return $self->set_value($name, $value);
 }
 
-sub apply_replace {
+sub transform_replace {
     my ($self, $args) = @_;
     my $val = $self->get_arg($args);
     my $pat = $self->get_arg($args);
@@ -213,6 +250,7 @@ sub tree_walker {
     for (my $i = 0; $i < @$dirs; $i++) {
         my $dir = $dirs->[$i];
         chdir $dir;
+        my $conf = YAML::XS::LoadFile('pkg.conf');
         File::Find::find(sub {
             if (-f 'pkg.conf' and $File::Find::dir ne $File::Find::topdir) {
                 $File::Find::prune = 1;
@@ -238,7 +276,7 @@ sub tree_walker {
             return if /^\./;
             return if -d;
             if ($type eq 'manifest') {
-                $callback->($File::Find::name, $_);
+                $callback->($File::Find::name, $_, $conf);
             }
         }, '.');
     }

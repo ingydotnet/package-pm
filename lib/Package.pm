@@ -80,10 +80,9 @@ sub execute {
         $cwd =~ s!.*/!!;
         $cwd;
     };
+    $self->_pkg_name($pkg_name);
 
     my $stash = $self->conf->stash;
-    $stash->{pkg}{name} = $pkg_name;
-    $stash->{author}{name} = $Package::Conf::author_name_hack;
 
     if ($to->exists) {
         die <<"..." if not $to->empty;
@@ -227,8 +226,13 @@ has _conf => (
         Package::Conf->new(
             src_dir => $self->from,
             cli_args => $self->_args,
+            pkg_name => $self->_pkg_name,
         );
     },
+);
+
+has _pkg_name => (
+    is => 'rw',
 );
 
 has _args => (
