@@ -257,9 +257,8 @@ From the command line:
     > pkg help
 
     > pkg new \
-            --from=pkg/perl/module-install \
+            --from=pkg/perl/dzil \
             --module=Foo::Bar \
-            --module=Foo::Bar::Baz \
             foo-bar-pm
 
 =head1 DESCRIPTION
