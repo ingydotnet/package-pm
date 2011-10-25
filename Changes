@@ -1,4 +1,9 @@
 ---
+version: 0.16
+date:    Mon Oct 24 21:22:18 PDT 2011
+changes:
+- Major refactor. Released from Larry Wall's new and comfy couch.
+---
 version: 0.15
 date:    Fri Oct 21 18:32:55 PDT 2011
 changes:

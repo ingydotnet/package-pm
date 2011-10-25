@@ -23,9 +23,7 @@ pkg - The Acmeist Module Package Management Tool
 C<pkg> is your tool for creating distributable, modular packages, in a variety
 of programming languages.
 
-In some languages, there's more than one way to do it (TMTOWTDI!!). C<pkg>
-accounts for that as well. You can often choose from a selection of packaging
-styles within a given programming language.
+See C<perldoc Package> for more info.
 
 =head1 AUTHOR
 
