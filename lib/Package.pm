@@ -3,7 +3,7 @@
 # abstract:  The Acmeist Module Package Management Tool
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2011
+# copyright: 2011, 2012
 
 use 5.008003;
 
@@ -17,7 +17,7 @@ use YAML::XS 0.37 ();
 #------------------------------------------------------------------------------#
 package Package;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
@@ -110,7 +110,7 @@ or name an empty directory, or cd to an empty directory.
         $self->write_file($f, $file);
     }
 
-    if ($stash->{git}{create}) {
+    if ($stash->{git}{init}) {
         if ($self->dryrun or $to =~ /^.*\/[xyz]{1,5}\d?$/) {
             (my $url = $stash->{git}{origin}) =~
                 s/\%pkg\.name\%/$stash->{pkg}{name}/e;

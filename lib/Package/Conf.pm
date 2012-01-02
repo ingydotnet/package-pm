@@ -3,7 +3,7 @@
 # abstract:  Configuration for Package
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2011
+# copyright: 2011, 2012
 
 package Package::Conf;
 use Mouse;
@@ -111,9 +111,9 @@ sub stash_builder {
     }
 
     $self->{stash} = $stash;
-    if (my $transforms = delete $stash->{pkg}{transforms}) {
-        for my $transform (@$transforms) {
-            $self->apply($transform);
+    if (my $actions = delete $stash->{pkg}{actions}) {
+        for my $action (@$actions) {
+            $self->apply($action);
         }
     }
 
@@ -144,16 +144,16 @@ sub expand_refs {
 }
 
 sub apply {
-    my ($self, $transform) = @_;
-    my $method = $self->get_method($transform);
-    die "$method transform not supported"
+    my ($self, $action) = @_;
+    my $method = $self->get_method($action);
+    die "$method action not supported"
         unless $self->can($method);
-    return $self->$method($transform);
+    return $self->$method($action);
 }
 
 sub get_method {
     my ($self, $args) = @_;
-    return "transform_" . shift @$args;
+    return "action_" . shift @$args;
 }
 
 sub get_arg {
@@ -176,13 +176,13 @@ sub set_value {
     return $value;
 }
 
-sub transform_get {
+sub action_get {
     my ($self, $args) = @_;
     my $key = $self->get_arg($args);
     return $self->lookup($key);
 }
 
-sub transform_init {
+sub action_init {
     my ($self, $args) = @_;
     my $name = $self->get_arg($args);
     my $value = $self->lookup($name);
@@ -192,7 +192,7 @@ sub transform_init {
     return $self->set_value($name, $value);
 }
 
-sub transform_replace {
+sub action_replace {
     my ($self, $args) = @_;
     my $val = $self->get_arg($args);
     my $pat = $self->get_arg($args);

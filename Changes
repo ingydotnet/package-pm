@@ -1,4 +1,9 @@
 ---
+version: 0.17
+date:    Sun Jan  1 18:14:48 PST 2012
+changes:
+- Small changes for git init
+---
 version: 0.16
 date:    Mon Oct 24 21:22:18 PDT 2011
 changes:

@@ -3,7 +3,7 @@
 # abstract:  Best Foo module ever
 # author:    Ingy döt Net <ingy@cpan.org>
 # license:   perl
-# copyright: 2011
+# copyright: 2012
 
 use 5.010;
 use strict;
