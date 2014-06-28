@@ -1,23 +1,5 @@
-##
-# name:      Package
-# abstract:  The Acmeist Module Package Management Tool
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2011, 2012
-
-use 5.008003;
-
-use Mouse 0.97 ();
-use MouseX::App::Cmd 0.08 ();
-use Hash::Merge 0.12 ();
-use IO::All 0.44 ();
-use Template::Toolkit::Simple 0.14 ();
-use YAML::XS 0.37 ();
-
-#------------------------------------------------------------------------------#
 package Package;
-
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
@@ -253,60 +235,3 @@ sub create_git_repo {
 }
 
 1;
-
-=head1 SYNOPSIS
-
-From the command line:
-
-    > pkg help
-
-    > pkg new \
-            --from=pkg/perl/dzil \
-            --module=Foo::Bar \
-            --desc='Foo to the Bar' \
-            foo-bar-pm
-
-=head1 DESCRIPTION
-
-C<pkg> is your tool for creating distributable, modular packages, in a variety
-of programming languages. Perl 5 modules for CPAN, Python modules for PyPI,
-Ruby modules for RubyGems, etc.
-
-In truth, pkg is nothing more than a simple way to create a new directory of
-starter files, by applying a set of configuration information to a set of file
-templates. The information is all completely in your control. You can use
-other people's templates or create your own.
-
-=head1 QUICK START
-
-Here's the quick and simple way to get started, assuming you are familiar with
-L<cpanm> and C<git>. From the command line:
-
-    # Go to the directory where you keep your repos:
-    cd $HOME/src/
-    # Get the base pkg directory:
-    git clone https://github.com/ingydotnet/pkg-pkg.git pkg
-    # pkg/README will contain a list of known pkg template repos
-    # Get a basic pkg template. In the case, for a Perl module:
-    git clone https://github.com/rafl/perl-pkg.git pkg/perl
-    # Maybe get a more specific Perl module template:
-    git clone https://github.com/rafl/perl-dzil-pkg.git pkg/perl/dzil
-    # Edit the conf files appropriately
-    edit pkg/pkg.conf pkg/perl/pkg.conf pkg/perl/dzil/pkg.conf
-    # Now create a new perl module in the foo-bar-pm directory
-    pkg new --from=pkg/perl --module=Foo::Bar --desc='Foo Bar' foo-bar-pm
-    # Make another new module!
-    pkg new --from=pkg/perl/dzil --module=Bar::Bar --desc='Bar Bar' bar-bar-pm
-
-That was easy.
-
-=head1 TEMPLATES
-
-The main template repository is: https://github.com/ingydotnet/pkg-pkg.git
-
-The README in this repo contains repos for many other repos. You can easily
-create your own too. Just make sure there is a C<pkg.conf> file in each
-template dir (even if it is empty). Template directories inherit from their
-parent directory.
-
-More doc soon.

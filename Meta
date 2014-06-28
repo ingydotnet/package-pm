@@ -1,0 +1,31 @@
+=meta: 0.0.1
+
+name: Package
+version: 0.18
+abstract: The Acmeist Module Package Management Tool
+homepage: https://metacpan.org/release/Package
+
+license: perl
+copyright: 2011-2014. Ingy döt Net.
+author:
+  name: Ingy döt Net
+  email: ingy@cpan.org
+  github: ingydotnet
+  twitter: ingydotnet
+  freenode: ingy
+  homepage: http:ingy.net
+
+requires:
+  perl: 5.8.1
+  Mouse: 0
+  MouseX::App::Cmd: 0
+  Hash::Merge: 0
+  Template::Toolkit::Simple: 0
+  YAML::XS: 0
+
+devel:
+  git: git@github.org/ingydotnet/package-pm
+  irc: irc.freenode.net/acmeism
+  bug: https://github.com/ingydotnet/package-pm/issues/
+
+=travis: perl

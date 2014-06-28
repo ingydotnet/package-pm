@@ -1,10 +1,3 @@
-##
-# name:      Package::Conf
-# abstract:  Configuration for Package
-# author:    Ingy döt Net <ingy@cpan.org>
-# license:   perl
-# copyright: 2011, 2012
-
 package Package::Conf;
 use Mouse;
 
