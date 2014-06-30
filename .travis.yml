@@ -19,6 +19,7 @@ install:
 - cpanm --quiet --notest
   Devel::Cover::Report::Coveralls
   Hash::Merge
+  IO::All
   Mouse
   MouseX::App::Cmd
   Template::Toolkit::Simple

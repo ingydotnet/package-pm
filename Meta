@@ -1,7 +1,7 @@
 =meta: 0.0.1
 
 name: Package
-version: 0.18
+version: 0.19
 abstract: The Acmeist Module Package Management Tool
 homepage: https://metacpan.org/release/Package
 
@@ -20,6 +20,7 @@ requires:
   Mouse: 0
   MouseX::App::Cmd: 0
   Hash::Merge: 0
+  IO::All: 0
   Template::Toolkit::Simple: 0
   YAML::XS: 0
 

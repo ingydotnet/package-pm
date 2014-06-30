@@ -1,4 +1,9 @@
 ---
+version: 0.19
+date:    Mon Jun 30 12:22:40 PDT 2014
+changes:
+- Add IO::All dependency
+---
 version: 0.18
 date:    Fri Jun 27 23:06:11 PDT 2014
 changes:
