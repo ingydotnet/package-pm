@@ -28,7 +28,7 @@ starter files, by applying a set of configuration information to a set of file
 templates. The information is all completely in your control. You can use
 other people's templates or create your own.
 
-=head1 QUICK START
+= Quick Start
 
 Here's the quick and simple way to get started, assuming you are familiar with
 [cpanm] and `git`. From the command line:
