@@ -1,5 +1,5 @@
 package Package;
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
