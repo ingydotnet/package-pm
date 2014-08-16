@@ -1,10 +1,10 @@
 use strict;
 use warnings;
- 
+
 use 5.010;
- 
+
 use ExtUtils::MakeMaker;
- 
+
 my %WriteMakefileArgs = (
   NAME => 'Foo::Bar',
   DISTNAME => 'Foo-Bar',
@@ -13,5 +13,5 @@ my %WriteMakefileArgs = (
   AUTHOR => 'Ingy döt Net <ingy@cpan.org>',
   LICENSE => 'perl',
 );
- 
+
 WriteMakefile(%WriteMakefileArgs);

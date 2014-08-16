@@ -44,7 +44,7 @@ sub dirs_builder {
         $dir = Cwd::abs_path($dir);
         chdir $dir or die "'$dir' does not exist";
         die "$dir is not a directory" unless -d $dir;
-        my $conf_file = 
+        my $conf_file =
             -f 'pkg.conf' ? 'pkg.conf' : ''
             or die "$dir contains no pkg.conf file";
         unshift @dirs, $dir;

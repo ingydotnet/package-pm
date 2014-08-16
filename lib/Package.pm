@@ -1,5 +1,5 @@
 package Package;
-our $VERSION = '0.24';
+our $VERSION = '0.25';
 
 #------------------------------------------------------------------------------#
 package Package::Command;
@@ -54,7 +54,7 @@ sub execute {
     my ($self, $opt, $args) = @_;
     my $pkg_name = pop(@$args) || '';
     $self->_args($args);
-    
+
     my $to = io($pkg_name || '.')->absolute;
 
     $pkg_name ||= do {
